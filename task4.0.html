@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All-in-One Web Projects</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+    }
+
+    header, footer {
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    nav a {
+      margin: 0 1rem;
+      color: white;
+      text-decoration: none;
+    }
+
+    section {
+      padding: 2rem;
+      border-bottom: 1px solid #ddd;
+    }
+
+    h2 {
+      border-bottom: 2px solid #333;
+      padding-bottom: 0.5rem;
+    }
+
+    /* To-Do App Styles */
+    #todo input, #todo button {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    #task-list li {
+      background: #fff;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      border-radius: 5px;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    /* Product Styles */
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>My Web Projects</h1>
+  <nav>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#todo">To-Do App</a>
+    <a href="#products">Product Listing</a>
+  </nav>
+</header>
+
+<!-- Portfolio Section -->
+<section id="portfolio">
+  <h2>Portfolio</h2>
+  <p>Hello! I'm a web developer. Below are my projects.</p>
+</section>
+
+<!-- To-Do List Section -->
+<section id="todo">
+  <h2>To-Do List App</h2>
+  <form id="todo-form">
+    <input type="text" id="task-input" placeholder="Add a task..." required />
+    <button type="submit">Add</button>
+  </form>
+  <ul id="task-list"></ul>
+</section>
+
+<!-- Product Listing Section -->
+<section id="products">
+  <h2>Product Listing Page</h2>
+  <div class="controls">
+    <select id="categoryFilter">
+      <option value="all">All Categories</option>
+      <option value="tech">Tech</option>
+      <option value="clothing">Clothing</option>
+    </select>
+
+    <select id="sortBy">
+      <option value="default">Sort By</option>
+      <option value="priceAsc">Price: Low to High</option>
+      <option value="priceDesc">Price: High to Low</option>
+      <option value="rating">Rating</option>
+    </select>
+  </div>
+  <div id="productList" class="product-grid"></div>
+</section>
+
+<footer>
+  <p>© 2025 My Projects</p>
+</footer>
+
+<!-- JavaScript -->
+<script>
+  // ===== To-Do App =====
+  const form = document.getElementById("todo-form");
+  const taskInput = document.getElementById("task-input");
+  const taskList = document.getElementById("task-list");
+
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = "";
+    tasks.forEach((task, index) => {
+      const li = document.createElement("li");
+      li.textContent = task.text;
+      li.className = task.completed ? "completed" : "";
+      li.addEventListener("click", () => {
+        tasks[index].completed = !tasks[index].completed;
+        saveTasks();
+        renderTasks();
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "X";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+      };
+
+      li.appendChild(delBtn);
+      taskList.appendChild(li);
+    });
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const newTask = taskInput.value.trim();
+    if (newTask !== "") {
+      tasks.push({ text: newTask, completed: false });
+      saveTasks();
+      renderTasks();
+      taskInput.value = "";
+    }
+  });
+
+  renderTasks();
+
+  // ===== Product Listing Page =====
+  const products = [
+    { name: "Laptop", category: "tech", price: 1200, rating: 4.5 },
+    { name: "Headphones", category: "tech", price: 200, rating: 4.2 },
+    { name: "T-Shirt", category: "clothing", price: 25, rating: 4.0 },
+    { name: "Smartphone", category: "tech", price: 850, rating: 4.8 },
+    { name: "Jeans", category: "clothing", price: 50, rating: 3.9 }
+  ];
+
+  const categoryFilter = document.getElementById("categoryFilter");
+  const sortBy = document.getElementById("sortBy");
+  const productList = document.getElementById("productList");
+
+  function displayProducts(items) {
+    productList.innerHTML = "";
+    items.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <h3>${p.name}</h3>
+        <p>Category: ${p.category}</p>
+        <p>Price: $${p.price}</p>
+        <p>Rating: ⭐${p.rating}</p>
+      `;
+      productList.appendChild(card);
+    });
+  }
+
+  function filterAndSortProducts() {
+    let filtered = [...products];
+
+    const category = categoryFilter.value;
+    if (category !== "all") {
+      filtered = filtered.filter(p => p.category === category);
+    }
+
+    switch (sortBy.value) {
+      case "priceAsc":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "priceDesc":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+    }
+
+    displayProducts(filtered);
+  }
+
+  categoryFilter.addEventListener("change", filterAndSortProducts);
+  sortBy.addEventListener("change", filterAndSortProducts);
+
+  displayProducts(products);
+</script>
+
+</body>
+</html>
